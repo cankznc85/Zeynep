@@ -15,28 +15,28 @@
     #flame { width:20px; height:20px; background:#ffaa00; border-radius:50%; position:absolute; top:-18px; left:10px; animation: flicker .2s infinite; box-shadow:0 0 15px #ffaa00; }
     @keyframes flicker { 50% { transform: scale(0.9); opacity: 0.8; } }
     
-    #main { display:none; flex-direction:column; align-items:center; width: 100%; position: absolute; }
-    #quote { font-size:20px; opacity:0; transition:1.2s; margin-bottom:15px; text-align:center; padding: 0 10px; }
-    #nameArea { font-size:50px; font-weight:bold; min-height:60px; color: var(--accent); }
+    #main { display:none; flex-direction:column; align-items:center; width: 100%; position: absolute; text-align: center; }
+    #quote { font-size:22px; opacity:0; transition:1.5s; margin-bottom:15px; padding: 0 20px; font-style: italic; }
+    #finalText { font-size:32px; font-weight:bold; color: var(--accent); padding: 0 20px; line-height: 1.4; }
     
-    .btn-group { margin-top: 30px; display: flex; gap: 10px; opacity: 0; transition: 1s; }
-    .btn-group.show { opacity: 1; }
-    button { background:none; border:1px solid var(--accent); padding:8px 15px; border-radius:20px; color:var(--accent); font-size: 14px; }
+    .btn-group { margin-top: 40px; display: flex; gap: 10px; opacity: 0; transition: 1s; visibility: hidden; }
+    .btn-group.show { opacity: 1; visibility: visible; }
+    button { background:none; border:1px solid var(--accent); padding:10px 20px; border-radius:25px; color:var(--accent); font-size: 14px; cursor: pointer; }
     
-    .heart { position:absolute; color:red; animation: fly 3s linear forwards; pointer-events:none; z-index:100; }
-    @keyframes fly { from { transform:translateY(0); opacity:1; } to { transform:translateY(-100vh); opacity:0; } }
+    .heart { position:absolute; color:red; animation: fly 4s linear forwards; pointer-events:none; z-index:100; }
+    @keyframes fly { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-100vh) scale(1.5); opacity:0; } }
 </style>
 </head>
 <body>
 
 <div id="candleBox" onclick="startScene()">
     <div id="candle"><div id="flame"></div></div>
-    <p style="margin-top:15px">Muma üfle (veya dokun) ✨</p>
+    <p style="margin-top:15px; font-size: 14px; opacity: 0.6;">Muma üfle veya dokun ✨</p>
 </div>
 
 <div id="main">
     <div id="quote">Bu kalp sadece sana üflendi.</div>
-    <div id="nameArea"></div>
+    <div id="finalText"></div>
     <div id="btns" class="btn-group">
         <button onclick="location.reload()">Tekrarla</button>
         <button onclick="document.body.classList.toggle('night')">Gece Modu</button>
@@ -48,8 +48,10 @@
 <script>
 let blown = false;
 const music = document.getElementById("music");
+const quote = document.getElementById("quote");
+const finalText = document.getElementById("finalText");
 
-// ÜFLEME ALGILAMA (Mobil için hassasiyet artırıldı)
+// MİKROFON DİNLEME
 navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const source = audioContext.createMediaStreamSource(stream);
@@ -64,71 +66,77 @@ navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
         if (!blown) requestAnimationFrame(check);
     }
     check();
-}).catch(() => {
-    console.log("Mikrofon izni yok, dokunma aktif.");
-});
+}).catch(() => console.log("Dokunma modu aktif."));
 
 function startScene() {
     if(blown) return;
     blown = true;
     
-    // Mum sönme efekti
+    // 1. Mum söner
     document.getElementById("candleBox").style.opacity = "0";
     
     setTimeout(() => {
         document.getElementById("candleBox").style.display = "none";
         document.getElementById("main").style.display = "flex";
         
-        // Müziği başlat
-        music.volume = 0.2;
+        // Müzik ayarları
+        music.volume = 0.3;
         music.currentTime = 60;
         music.play().catch(() => {});
 
-        // 1. Söz görünür
+        // 2. İlk söz görünür
         setTimeout(() => {
-            document.getElementById("quote").style.opacity = "1";
+            quote.style.opacity = "1";
             
-            // 2. İsim yazılmaya başlar
+            // 3. İlk söz 3 saniye durur, sonra yavaşça silinir
             setTimeout(() => {
-                const targetName = "Zeynep";
-                let i = 0;
-                const area = document.getElementById("nameArea");
+                quote.style.opacity = "0";
                 
-                const timer = setInterval(() => {
-                    area.textContent += targetName[i];
-                    i++;
-                    if (i === targetName.length) {
-                        clearInterval(timer);
-                        finish();
-                    }
-                }, 400); // Yazım hızı
-            }, 1500);
+                // 4. Silindikten sonra asıl yazı (Zeynep...) başlar
+                setTimeout(() => {
+                    quote.style.display = "none"; // Alanı boşalt
+                    typeWriter("Zeynep seni çok seviyorum ❤️");
+                }, 1500); // Silinme animasyonu bitişi bekler
+                
+            }, 3000); // Sözün ekranda kalma süresi
         }, 500);
     }, 800);
 }
 
-function finish() {
-    // Ses yükselt
-    let vol = 0.2;
-    const interval = setInterval(() => {
-        if (vol < 0.9) { vol += 0.1; music.volume = vol; }
-        else clearInterval(interval);
-    }, 300);
+function typeWriter(txt) {
+    let i = 0;
+    const timer = setInterval(() => {
+        finalText.textContent += txt[i];
+        i++;
+        if (i === txt.length) {
+            clearInterval(timer);
+            finish();
+        }
+    }, 150); // Yazı hızı
+}
 
-    // Butonları göster
+function finish() {
+    // Ses yavaşça yükselir
+    let vol = 0.3;
+    const volInterval = setInterval(() => {
+        if (vol < 0.8) { vol += 0.05; music.volume = vol; }
+        else clearInterval(volInterval);
+    }, 400);
+
+    // Butonlar görünür
     document.getElementById("btns").classList.add("show");
 
-    // Kalp yağmuru
+    // Kalp yağmuru başlar
     setInterval(() => {
         const h = document.createElement("div");
         h.className = "heart";
-        h.innerHTML = "❤️";
+        h.innerHTML = Math.random() > 0.5 ? "❤️" : "💖";
         h.style.left = Math.random() * 100 + "vw";
         h.style.top = "90vh";
-        h.style.fontSize = (Math.random() * 20 + 10) + "px";
+        h.style.fontSize = (Math.random() * 20 + 15) + "px";
         document.body.appendChild(h);
-        setTimeout(() => h.remove(), 3000);
-    }, 300);
+        setTimeout(() => h.remove(), 4000);
+    }, 400);
 }
 </script>
 </body>
