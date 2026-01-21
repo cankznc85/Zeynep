@@ -175,7 +175,8 @@ function startScene(){
 /* === SÖZÜ GÖSTER === */
 function showQuote(){
     const q=document.getElementById("quote");
-    q.style.opacity=1;
+    q.style.opacity=1; // söz görünür
+    startMusic();
     setTimeout(()=>{
         typeWriter("Zeynep");
     },2000); // 2 saniye söz gösterildikten sonra Zeynep başlar
