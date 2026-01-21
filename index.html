@@ -2,276 +2,134 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Zeynep'e Özel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
-:root{
-    --bg:#ffffff;
-    --text:#0b1c3d;
-    --accent:#0b1c3d;
-}
-
-body.night{
-    --bg:#0b1c3d;
-    --text:#ffffff;
-    --accent:#ffffff;
-}
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins', sans-serif;
-}
-
-body{
-    background:var(--bg);
-    color:var(--text);
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden;
-    transition:0.8s;
-}
-
-/* === MUM === */
-#candleBox{text-align:center; transition: 0.5s;}
-#candle{
-    width:40px;height:120px;
-    background:var(--accent);
-    border-radius:10px;
-    margin:auto;position:relative;
-}
-#flame{
-    width:26px;height:26px;
-    background:#ffcc80;
-    border-radius:50%;
-    position:absolute;top:-22px;left:7px;
-    animation:flicker .25s infinite;
-    box-shadow:0 0 15px #ffcc80;
-}
-@keyframes flicker{
-    50%{transform:scale(.85)}
-}
-#instruction{margin-top:16px;opacity:.8}
-
-/* === SAHNE === */
-#main{
-    display:none;
-    position:absolute;
-    inset:0;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    z-index: 10;
-}
-#quote{
-    font-size:24px;
-    margin-bottom:20px;
-    opacity:0;
-    transition:1s;
-    text-align: center;
-}
-#nameContainer{
-    font-size:64px;
-    font-weight:700;
-    min-height:80px;
-    color: var(--accent);
-}
-
-/* === EFEKTLER === */
-.heart{
-    position:absolute;
-    font-size:24px;
-    color: #e74c3c;
-    z-index: 5;
-    animation:float 4s linear forwards;
-}
-@keyframes float{
-    0%{transform:translateY(0) scale(1); opacity:1}
-    100%{transform:translateY(-100vh) scale(1.5); opacity:0}
-}
-
-.confetti{
-    position:absolute;
-    width:10px;height:10px;
-    background:var(--accent);
-    z-index: 5;
-    animation:confettiAnim 4s linear forwards;
-}
-@keyframes confettiAnim{
-    to{transform:translateY(110vh) rotate(720deg);opacity:0}
-}
-
-/* === BUTONLAR === */
-.btn-group { margin-top: 30px; display: flex; gap: 10px; }
-button{
-    background:none;
-    border:1px solid var(--accent);
-    padding:10px 20px;
-    border-radius:25px;
-    color:var(--accent);
-    cursor:pointer;
-    opacity:0;
-    pointer-events: none;
-    transition:.5s;
-}
-button.show{opacity:1; pointer-events: auto;}
-
-.fadeOut{opacity: 0; pointer-events: none;}
+    :root { --bg:#ffffff; --text:#0b1c3d; --accent:#0b1c3d; }
+    body.night { --bg:#0b1c3d; --text:#ffffff; --accent:#ffffff; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:sans-serif; }
+    body { background:var(--bg); color:var(--text); height:100vh; display:flex; justify-content:center; align-items:center; overflow:hidden; transition:0.8s; touch-action: manipulation; }
+    
+    #candleBox { text-align:center; transition: 0.5s; }
+    #candle { width:40px; height:100px; background:var(--accent); border-radius:8px; margin:auto; position:relative; }
+    #flame { width:20px; height:20px; background:#ffaa00; border-radius:50%; position:absolute; top:-18px; left:10px; animation: flicker .2s infinite; box-shadow:0 0 15px #ffaa00; }
+    @keyframes flicker { 50% { transform: scale(0.9); opacity: 0.8; } }
+    
+    #main { display:none; flex-direction:column; align-items:center; width: 100%; position: absolute; }
+    #quote { font-size:20px; opacity:0; transition:1.2s; margin-bottom:15px; text-align:center; padding: 0 10px; }
+    #nameArea { font-size:50px; font-weight:bold; min-height:60px; color: var(--accent); }
+    
+    .btn-group { margin-top: 30px; display: flex; gap: 10px; opacity: 0; transition: 1s; }
+    .btn-group.show { opacity: 1; }
+    button { background:none; border:1px solid var(--accent); padding:8px 15px; border-radius:20px; color:var(--accent); font-size: 14px; }
+    
+    .heart { position:absolute; color:red; animation: fly 3s linear forwards; pointer-events:none; z-index:100; }
+    @keyframes fly { from { transform:translateY(0); opacity:1; } to { transform:translateY(-100vh); opacity:0; } }
 </style>
 </head>
-
 <body>
 
-<div id="candleBox">
+<div id="candleBox" onclick="startScene()">
     <div id="candle"><div id="flame"></div></div>
-    <div id="instruction">Muma üfle ✨</div>
+    <p style="margin-top:15px">Muma üfle (veya dokun) ✨</p>
 </div>
 
 <div id="main">
     <div id="quote">Bu kalp sadece sana üflendi.</div>
-    <div id="nameContainer"></div>
-    <div class="btn-group">
-        <button id="resetBtn" onclick="location.reload()">Tekrarla</button>
-        <button id="modeBtn" onclick="toggleNight()">Gece Modu</button>
+    <div id="nameArea"></div>
+    <div id="btns" class="btn-group">
+        <button onclick="location.reload()">Tekrarla</button>
+        <button onclick="document.body.classList.toggle('night')">Gece Modu</button>
     </div>
 </div>
 
-<audio id="music" src="music.mp3" preload="auto"></audio>
+<audio id="music" src="music.mp3"></audio>
 
 <script>
 let blown = false;
-let vol = 0.1;
 const music = document.getElementById("music");
-const nameContainer = document.getElementById("nameContainer");
-const quote = document.getElementById("quote");
-const main = document.getElementById("main");
-const candleBox = document.getElementById("candleBox");
 
-/* === ÜFLEME ALGILAMA === */
+// ÜFLEME ALGILAMA (Mobil için hassasiyet artırıldı)
 navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const mic = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    mic.connect(analyser);
-    analyser.fftSize = 256;
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    source.connect(analyser);
     const data = new Uint8Array(analyser.frequencyBinCount);
-
-    function detect(){
+    
+    function check() {
         analyser.getByteFrequencyData(data);
-        let sum = 0;
-        for(let i=0; i<data.length; i++) sum += data[i];
-        let average = sum / data.length;
-
-        if(average > 55 && !blown){ // Hassasiyet ayarı (55)
-            blown = true;
-            startScene();
-        }
-        if(!blown) requestAnimationFrame(detect);
+        let volume = data.reduce((a, b) => a + b) / data.length;
+        if (volume > 45 && !blown) startScene(); 
+        if (!blown) requestAnimationFrame(check);
     }
-    detect();
-}).catch(err => {
-    console.log("Mikrofon erişimi reddedildi, tıklama ile devam ediliyor.");
-    document.body.onclick = () => { if(!blown) { blown=true; startScene(); }};
+    check();
+}).catch(() => {
+    console.log("Mikrofon izni yok, dokunma aktif.");
 });
 
-/* === SAHNE BAŞLAT === */
-function startScene(){
-    candleBox.classList.add("fadeOut");
+function startScene() {
+    if(blown) return;
+    blown = true;
+    
+    // Mum sönme efekti
+    document.getElementById("candleBox").style.opacity = "0";
     
     setTimeout(() => {
-        candleBox.style.display = "none";
-        main.style.display = "flex";
+        document.getElementById("candleBox").style.display = "none";
+        document.getElementById("main").style.display = "flex";
         
-        // Müziği Başlat
-        music.currentTime = 60; // 1. dakikadan başlar
-        music.volume = vol;
-        music.play().catch(e => console.log("Müzik başlatılamadı:", e));
+        // Müziği başlat
+        music.volume = 0.2;
+        music.currentTime = 60;
+        music.play().catch(() => {});
 
-        // Önce Söz Çıksın
+        // 1. Söz görünür
         setTimeout(() => {
-            quote.style.opacity = 1;
-            // Sözden 1.5 saniye sonra isim başlasın
+            document.getElementById("quote").style.opacity = "1";
+            
+            // 2. İsim yazılmaya başlar
             setTimeout(() => {
-                typeWriter("Zeynep");
+                const targetName = "Zeynep";
+                let i = 0;
+                const area = document.getElementById("nameArea");
+                
+                const timer = setInterval(() => {
+                    area.textContent += targetName[i];
+                    i++;
+                    if (i === targetName.length) {
+                        clearInterval(timer);
+                        finish();
+                    }
+                }, 400); // Yazım hızı
             }, 1500);
         }, 500);
-    }, 1000);
+    }, 800);
 }
 
-/* === HARF HARF YAZDIRMA === */
-function typeWriter(txt){
-    let i = 0;
-    nameContainer.textContent = ""; 
+function finish() {
+    // Ses yükselt
+    let vol = 0.2;
     const interval = setInterval(() => {
-        nameContainer.textContent += txt[i];
-        i++;
-        if(i === txt.length){
-            clearInterval(interval);
-            finishAnimation();
-        }
-    }, 300); // Harf hızı
-}
+        if (vol < 0.9) { vol += 0.1; music.volume = vol; }
+        else clearInterval(interval);
+    }, 300);
 
-function finishAnimation(){
-    boostMusic();
-    startHearts();
-    startConfetti();
-    
     // Butonları göster
-    setTimeout(() => {
-        document.getElementById("resetBtn").classList.add("show");
-        document.getElementById("modeBtn").classList.add("show");
-    }, 2000);
-}
+    document.getElementById("btns").classList.add("show");
 
-/* === EFEKTLER === */
-function startHearts(){
+    // Kalp yağmuru
     setInterval(() => {
-        if(!blown) return;
         const h = document.createElement("div");
         h.className = "heart";
-        h.innerHTML = Math.random() > 0.7 ? "❤️" : "💖";
+        h.innerHTML = "❤️";
         h.style.left = Math.random() * 100 + "vw";
-        h.style.top = "100vh";
+        h.style.top = "90vh";
+        h.style.fontSize = (Math.random() * 20 + 10) + "px";
         document.body.appendChild(h);
-        setTimeout(() => h.remove(), 4000);
-    }, 400);
-}
-
-function startConfetti(){
-    for(let i=0; i<80; i++){
-        const c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random() * 100 + "vw";
-        c.style.top = "-20px";
-        c.style.backgroundColor = `hsl(${Math.random()*360}, 70%, 60%)`;
-        c.style.animationDelay = Math.random() * 3 + "s";
-        document.body.appendChild(c);
-        setTimeout(() => c.remove(), 5000);
-    }
-}
-
-function boostMusic(){
-    const b = setInterval(() => {
-        if(vol < 0.8){ 
-            vol += 0.05; 
-            if(vol > 1) vol = 1;
-            music.volume = vol;
-        } else {
-            clearInterval(b);
-        }
-    }, 200);
-}
-
-function toggleNight(){
-    document.body.classList.toggle("night");
+        setTimeout(() => h.remove(), 3000);
+    }, 300);
 }
 </script>
-
 </body>
 </html>
