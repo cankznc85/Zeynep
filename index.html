@@ -69,15 +69,15 @@ body{
     align-items:center;
     flex-direction:column;
 }
+#quote{
+    font-size:24px;
+    margin-bottom:20px;
+    opacity:0;
+}
 #name{
     font-size:64px;
     font-weight:700;
     min-height:80px;
-}
-#subtitle{
-    margin-top:12px;
-    opacity:0;
-    transition:1.5s;
 }
 
 /* === KALPLER === */
@@ -115,7 +115,11 @@ body{
     transition:.5s;
 }
 #reset.show,#mode.show{opacity:1}
-#mode{margin-top:10px}
+
+/* === KİLİT === */
+.locked *:not(#reset):not(#mode){
+    pointer-events:none;
+}
 </style>
 </head>
 
@@ -127,8 +131,8 @@ body{
 </div>
 
 <div id="main">
+    <div id="quote">Bu kalp sadece sana üflendi.</div>
     <div id="name"></div>
-    <div id="subtitle">Bu kalp sadece sana üflendi.</div>
     <button id="reset" onclick="location.reload()">Bir kez daha izle</button>
     <button id="mode" onclick="toggleNight()">Gece Modu</button>
 </div>
@@ -139,7 +143,7 @@ body{
 let blown=false, analyser,data;
 let vol=0.02;
 
-/* === ÜFLEME === */
+/* === ÜFLEME ALGILAMA === */
 navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
     const ctx=new AudioContext();
     const mic=ctx.createMediaStreamSource(stream);
@@ -157,29 +161,38 @@ function detect(){
     requestAnimationFrame(detect);
 }
 
-/* === SAHNE === */
+/* === SAHNE BAŞLAT === */
 function startScene(){
     candleBox.classList.add("fadeOut");
+    document.body.classList.add("locked");
     setTimeout(()=>{
         candleBox.style.display="none";
         main.style.display="flex";
-        startMusic();
-        typeWriter("Zeynep");
+        showQuote();
     },1000);
 }
 
-/* === YAZI === */
+/* === SÖZÜ GÖSTER === */
+function showQuote(){
+    const q=document.getElementById("quote");
+    q.style.opacity=1;
+    setTimeout(()=>{
+        typeWriter("Zeynep");
+    },2000); // 2 saniye söz gösterildikten sonra Zeynep başlar
+}
+
+/* === HARF HARF Zeynep === */
 function typeWriter(txt){
     let i=0;
     const t=setInterval(()=>{
         name.textContent+=txt[i++];
         if(i===txt.length){
             clearInterval(t);
-            subtitle.style.opacity=.8;
             boostMusic();
             hearts();
             confetti();
             setTimeout(()=>{
+                document.body.classList.remove("locked");
                 reset.classList.add("show");
                 mode.classList.add("show");
             },8000);
@@ -187,7 +200,7 @@ function typeWriter(txt){
     },250);
 }
 
-/* === KALP === */
+/* === KALPLER === */
 function hearts(){
     const r=name.getBoundingClientRect();
     setInterval(()=>{
