@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Bir Üfleyiş</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+    --bg:#ffffff;
+    --text:#0b1c3d;
+    --accent:#0b1c3d;
+}
+
+body.night{
+    --bg:#0b1c3d;
+    --text:#ffffff;
+    --accent:#ffffff;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    transition:0.8s;
+}
+
+/* === MUM === */
+#candleBox{text-align:center}
+#candle{
+    width:40px;height:120px;
+    background:var(--accent);
+    border-radius:10px;
+    margin:auto;position:relative;
+}
+#flame{
+    width:26px;height:26px;
+    background:#ffcc80;
+    border-radius:50%;
+    position:absolute;top:-22px;left:7px;
+    animation:flicker .25s infinite;
+    box-shadow:0 0 15px #ffcc80;
+}
+@keyframes flicker{
+    50%{transform:scale(.85)}
+}
+#text{margin-top:16px;opacity:.8}
+
+/* === FADE === */
+.fadeOut{animation:fade 1s forwards}
+@keyframes fade{to{opacity:0}}
+
+/* === SAHNE === */
+#main{
+    display:none;
+    position:absolute;inset:0;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+}
+#name{
+    font-size:64px;
+    font-weight:700;
+    min-height:80px;
+}
+#subtitle{
+    margin-top:12px;
+    opacity:0;
+    transition:1.5s;
+}
+
+/* === KALPLER === */
+.heart{
+    position:absolute;
+    font-size:18px;
+    color:var(--accent);
+    animation:float 6s linear forwards;
+}
+@keyframes float{
+    to{transform:translateY(-100vh);opacity:0}
+}
+
+/* === KONFETİ === */
+.confetti{
+    position:absolute;
+    width:8px;height:14px;
+    background:var(--accent);
+    animation:confetti 4s linear forwards;
+}
+@keyframes confetti{
+    to{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+
+/* === BUTONLAR === */
+#reset,#mode{
+    margin-top:24px;
+    background:none;
+    border:1px solid var(--accent);
+    padding:8px 18px;
+    border-radius:20px;
+    color:var(--accent);
+    cursor:pointer;
+    opacity:0;
+    transition:.5s;
+}
+#reset.show,#mode.show{opacity:1}
+#mode{margin-top:10px}
+</style>
+</head>
+
+<body>
+
+<div id="candleBox">
+    <div id="candle"><div id="flame"></div></div>
+    <div id="text">Muma üfle ✨</div>
+</div>
+
+<div id="main">
+    <div id="name"></div>
+    <div id="subtitle">Bu kalp sadece sana üflendi.</div>
+    <button id="reset" onclick="location.reload()">Bir kez daha izle</button>
+    <button id="mode" onclick="toggleNight()">Gece Modu</button>
+</div>
+
+<audio id="music" src="music.mp3" preload="auto"></audio>
+
+<script>
+let blown=false, analyser,data;
+let vol=0.02;
+
+/* === ÜFLEME === */
+navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    const ctx=new AudioContext();
+    const mic=ctx.createMediaStreamSource(stream);
+    analyser=ctx.createAnalyser();
+    mic.connect(analyser);
+    analyser.fftSize=256;
+    data=new Uint8Array(analyser.frequencyBinCount);
+    detect();
+});
+function detect(){
+    analyser.getByteFrequencyData(data);
+    if(data.reduce((a,b)=>a+b)/data.length>50 && !blown){
+        blown=true; startScene();
+    }
+    requestAnimationFrame(detect);
+}
+
+/* === SAHNE === */
+function startScene(){
+    candleBox.classList.add("fadeOut");
+    setTimeout(()=>{
+        candleBox.style.display="none";
+        main.style.display="flex";
+        startMusic();
+        typeWriter("Zeynep");
+    },1000);
+}
+
+/* === YAZI === */
+function typeWriter(txt){
+    let i=0;
+    const t=setInterval(()=>{
+        name.textContent+=txt[i++];
+        if(i===txt.length){
+            clearInterval(t);
+            subtitle.style.opacity=.8;
+            boostMusic();
+            hearts();
+            confetti();
+            setTimeout(()=>{
+                reset.classList.add("show");
+                mode.classList.add("show");
+            },8000);
+        }
+    },250);
+}
+
+/* === KALP === */
+function hearts(){
+    const r=name.getBoundingClientRect();
+    setInterval(()=>{
+        const h=document.createElement("div");
+        h.className="heart";
+        h.innerHTML=Math.random()>.85?"Z ❤️":"❤";
+        h.style.left=r.left+r.width/2+(Math.random()*40-20)+"px";
+        h.style.top=r.bottom+"px";
+        document.body.appendChild(h);
+        setTimeout(()=>h.remove(),6000);
+    },350);
+}
+
+/* === KONFETİ === */
+function confetti(){
+    for(let i=0;i<120;i++){
+        const c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"vw";
+        c.style.top="-10px";
+        c.style.animationDelay=Math.random()+"s";
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),4000);
+    }
+}
+
+/* === MÜZİK === */
+function startMusic(){
+    music.currentTime=60;
+    music.volume=vol;
+    music.play();
+    const s=setInterval(()=>{
+        if(vol<0.3){vol+=.01;music.volume=vol}else clearInterval(s);
+    },250);
+}
+function boostMusic(){
+    const b=setInterval(()=>{
+        if(vol<1){vol+=.05;music.volume=vol}else clearInterval(b);
+    },150);
+}
+
+/* === GECE MODU === */
+function toggleNight(){
+    document.body.classList.toggle("night");
+}
+</script>
+
+</body>
+</html>
