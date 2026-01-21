@@ -73,6 +73,7 @@ body{
     font-size:24px;
     margin-bottom:20px;
     opacity:0;
+    transition:0.8s;
 }
 #name{
     font-size:64px;
@@ -168,18 +169,22 @@ function startScene(){
     setTimeout(()=>{
         candleBox.style.display="none";
         main.style.display="flex";
-        showQuote();
+        showQuoteAndMusic();
     },1000);
 }
 
-/* === SÖZÜ GÖSTER === */
-function showQuote(){
+/* === SÖZÜ GÖSTER VE MÜZİĞİ BAŞLAT === */
+function showQuoteAndMusic(){
     const q=document.getElementById("quote");
-    q.style.opacity=1; // söz görünür
-    startMusic();
+    q.style.opacity=1;
+    // Müzik 1:00’dan sessiz başlar
+    music.currentTime=60;
+    music.volume=vol;
+    music.play();
+    // 2 saniye sonra Zeynep başlar
     setTimeout(()=>{
         typeWriter("Zeynep");
-    },2000); // 2 saniye söz gösterildikten sonra Zeynep başlar
+    },2000);
 }
 
 /* === HARF HARF Zeynep === */
@@ -228,15 +233,7 @@ function confetti(){
     }
 }
 
-/* === MÜZİK === */
-function startMusic(){
-    music.currentTime=60;
-    music.volume=vol;
-    music.play();
-    const s=setInterval(()=>{
-        if(vol<0.3){vol+=.01;music.volume=vol}else clearInterval(s);
-    },250);
-}
+/* === MÜZİK SES YÜKSELT === */
 function boostMusic(){
     const b=setInterval(()=>{
         if(vol<1){vol+=.05;music.volume=vol}else clearInterval(b);
